@@ -1,9 +1,9 @@
-# Smart Contract Activity Monitor
+### Description
 
 A collection of scripts for monitoring smart contract activities across multiple blockchains.
 
-## Current Scripts
+**Current Scripts**
 
-| name                                                                                    | Description                                                   |
-|-----------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| [gtrade-trade-monitoring.js](arbitrum%2Fgtrade-monitoring%2Fgtrade-trade-monitoring.js) | Monitors trading activity on the gTrade decentralized trading platform. |
+| name                                                                                    | Description                                                   | Chain        |
+|-----------------------------------------------------------------------------------------|---------------------------------------------------------------|--------------|
+| [gtrade-trade-monitoring.js](arbitrum%2Fgtrade-monitoring%2Fgtrade-trade-monitoring.js) | Monitors trading activity on the gTrade decentralized trading platform. | Arbitrum     |
