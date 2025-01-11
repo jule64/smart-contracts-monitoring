@@ -9,7 +9,7 @@
      */
 
     const { ethers } = require('ethers');
-    const {GNSDiamond, GNSTradingInteractions, GNSOracle, oracles} = require('./GNSContracts');
+    const {GNSDiamond, GNSTradingInteractions, GNSOracle, GNSPriceAggregator} = require('./GNSContracts');
     require('dotenv').config();
 
     const infuraApiKey = process.env.INFURA_API_KEY;
@@ -24,9 +24,12 @@
 
     const diamond = new ethers.Contract(GNSDiamond.address, GNSDiamond.ABI, provider);
     const trading = new ethers.Contract('', GNSTradingInteractions.ABI, provider);
+    const priceAggreg = new ethers.Contract(GNSDiamond.address, GNSPriceAggregator.ABI, provider);
 
     let tradingPairs = await loadTradingPairsFromGtradeBackend();
 
+
+    const oracles = await priceAggreg.getOracles();
     for (const i in oracles) {
         const oracle = new ethers.Contract(oracles[i], GNSOracle.ABI, provider);
         oracle.on('*', processOracleEvent);
