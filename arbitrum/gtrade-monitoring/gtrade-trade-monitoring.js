@@ -1,4 +1,4 @@
-
+'use strict';
 (async () => {
 
     /**
@@ -18,9 +18,9 @@
         throw new Error('Please provide an INFURA_API_KEY in your .env file');
     }
 
-    const provider = new ethers.providers.InfuraProvider('arbitrum', infuraApiKey);
-    provider.pollingInterval = 5000;
-
+    // const provider = new ethers.providers.InfuraProvider('arbitrum', infuraApiKey);
+    // provider.pollingInterval = 5000;
+    const provider = new ethers.providers.InfuraWebSocketProvider('arbitrum', infuraApiKey);
 
     const diamond = new ethers.Contract(GNSDiamond.address, GNSDiamond.ABI, provider);
     const trading = new ethers.Contract('', GNSTradingInteractions.ABI, provider);
@@ -35,7 +35,7 @@
         oracle.on('*', processOracleEvent);
     }
 
-    console.log(wrapMessageWithTimeStampAndAppName('Monitoring G-trade trading activity..'));
+    logAppMessage('Monitoring Gtrade trading activity..');
 
 
     async function processOracleEvent(data) {
@@ -55,38 +55,37 @@
 
             let facetAddress = await diamond.facetAddress(functionSelector);
 
+            let message;
             if (facetAddress === GNSTradingInteractions.address) {
                 let txdata = trading.interface.parseTransaction({data: tx.data});
 
 
                 if (txdata.name === 'openTrade') {
                     let trade = txdata.args._trade;
+                    let user = trade.user;
                     let pairIndex = trade.pairIndex;
+                    let tradingPair = tradingPairs[pairIndex].from + '/' + tradingPairs[pairIndex].to;
+                    let direction = trade.long ? 'long' : 'short';
+                    let price = trade.openPrice.toNumber();
+                    let leverage = trade.leverage;
+                    let collateral = trade.collateralAmount.toNumber();
 
-                    let objectToParse = {};
-                    objectToParse.tradingPair = tradingPairs[pairIndex].from + '/' + tradingPairs[pairIndex].to;
-
-                    let trnParams = Object.keys(objectToParse).filter(v => isNaN(parseInt(v))).map((name) => [name, objectToParse[name]]);
-
-                    console.log(wrapMessageWithTimeStampAndAppName(`New trade: ${trnParams.map((arr) => arr[0] + ': ' + arr[1].toString()).join(', ')}`));
-                    console.log(txdata);
+                    message = `New trade: ${direction} ${tradingPair} @${price} Lev: ${leverage} Collateral: ${collateral} (user: ${user})`;
 
                 } else {
-
-                    console.log(wrapMessageWithTimeStampAndAppName(`New trading event: ${txdata.name}`));
                     console.log(txdata);
-
+                    message =`New trading event: ${txdata.name}`;
                 }
 
             } else {
                 // not interested
-                console.log(wrapMessageWithTimeStampAndAppName('Received non-trading event: contract -> ' + facetAddress + '| function -> ' + functionSelector));
+                message = 'Received non-trading event: contract -> ' + facetAddress + '| function -> ' + functionSelector;
             }
+            logAppMessage(message);
     }
 
-    function wrapMessageWithTimeStampAndAppName(msg) {
-        const timeStr = new Date().toLocaleTimeString();
-        return `${timeStr}: G-Trade: ${msg}`;
+    function logAppMessage(msg) {
+        console.log(`[${new Date().toLocaleTimeString()}][GTrade]: ${msg}`);
     }
 
 
@@ -101,18 +100,16 @@
      *   }
      */
     async function loadTradingPairsFromGtradeBackend() {
-        try {
-            const response = await fetch('https://backend-arbitrum.gains.trade/trading-variables');
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+        let response = await fetch('https://backend-arbitrum.gains.trade/trading-variables');
 
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        } else {
             const data = await response.json();
             return data.pairs;
-        } catch (error) {
-            console.error('Error loading Gtrade backend info:', error);
         }
+
     }
 
 
