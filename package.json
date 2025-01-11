@@ -1,0 +1,17 @@
+{
+  "name": "smart-contracts-monitoring",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "esversion": 6,
+  "author": "jule64",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ethers": "^5.2.0",
+    "play-sound": "^1.1.5"
+  }
+}
