@@ -10,7 +10,7 @@
 
     const { ethers } = require('ethers');
     const {GNSDiamond, GNSTradingInteractions, GNSOracle, GNSPriceAggregator} = require('./GNSContracts');
-    require('dotenv').config();
+    require('dotenv').config({path: '../../.env'});
 
     const infuraApiKey = process.env.INFURA_API_KEY;
 
