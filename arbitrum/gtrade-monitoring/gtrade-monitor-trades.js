@@ -1,7 +1,7 @@
 'use strict';
 
 
-(async () => {
+(async function main() {
 
     /**
      * Monitors trading activity on the Gtrade decentralized trading platform (https://gains.trade/) and logs trade details
@@ -194,9 +194,9 @@
     provider._websocket.on('close', (code, reason) => {
         console.warn(`WebSocket closed: ${reason} (code: ${code})`);
         setTimeout(() => {
-            console.log('Reconnecting...');
-            provider._websocket.connect();
-        }, 1000);
+            console.log('Restarting everything...');
+            main();
+        }, 10000);
     });
 
     /**
