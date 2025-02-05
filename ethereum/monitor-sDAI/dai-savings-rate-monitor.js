@@ -48,7 +48,7 @@ async function mainLoop() {
         saveDsr(dsrYear);
 
     } else {
-        let waitTimeSeconds = 6 * 60 * 60000; // 6 hours
+        let waitTimeSeconds = 12 * 60 * 60000; // 12 hours
         let nextCheckTime = new Date(Date.now() + waitTimeSeconds).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true}).toLowerCase();
         logAppMessage(`No change in dsr rate (current value: ${dsrYear}%).  Will check again at ${nextCheckTime}`);
         setTimeout(mainLoop, waitTimeSeconds);
