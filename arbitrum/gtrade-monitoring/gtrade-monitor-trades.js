@@ -23,6 +23,7 @@
     const {ethers} = require('ethers');
     const {GNSDiamond, GNSTradingCallbacks} = require('./GNSContracts');
     require('dotenv').config({path: '../../.env'});
+    const fs =  require('fs');
     const player = require("play-sound")();
 
     const INFURA_KEY = process.env.INFURA_API_KEY;
@@ -33,15 +34,21 @@
 
     const diamond = new ethers.Contract(GNSDiamond.address, GNSTradingCallbacks.ABI, provider);
 
-    let tradingPairs = await loadTradingPairsFromGtradeBackend();
+    const tradingPairs = await loadTradingPairsFromGtradeBackend();
+
+    const userWatchlist = fs.readFileSync('./watchlist', 'utf8').split('\n');
 
     function logTrade(user, orderType, tradeDetailsForLogging, notional, collateral) {
-        if (user === process.env.MY_ADDRESS || user === '0x2E2e95fF8042A14Fa49DEB03bdb9d9113868494E' || user === '0x1755AF9d62eF0978AC9dAc48B3EeEBB90e793b82') {
-            logAppMessage(`>>>>>>>>> new ${orderType} trade for tracked user <<<<<<<<<<`);
+        if (user === process.env.MY_ADDRESS || userWatchlist.includes(user)) {
+            logAppMessage(`>>>>>>>>> TRACKED USER - new ${orderType} trade <<<<<<<<<<`);
             isDayTime() && player.play('../../sounds/460133__eschwabe3__robot-affirmative.wav');
             logAppMessage(tradeDetailsForLogging);
         } else if (collateral > 5000) {
-            logAppMessage(`>>>>>>>>> new LARGE ${orderType} trade for untracked user <<<<<<<<<<`);
+            logAppMessage(`>>>>>>>>> $COLLATERAL - new ${orderType} trade for untracked user <<<<<<<<<<`);
+            isDayTime() && player.play('../../sounds/577023__nezuai__ui-sound-14.wav'); // light sound
+            logAppMessage(tradeDetailsForLogging);
+        } else if (notional > 100000) {
+            logAppMessage(`>>>>>>>>> $NOTIONAL - new ${orderType} trade for untracked user <<<<<<<<<<`);
             isDayTime() && player.play('../../sounds/577023__nezuai__ui-sound-14.wav'); // light sound
             logAppMessage(tradeDetailsForLogging);
         } else {
@@ -104,7 +111,7 @@
         let notional = leverage * collateral;
 
         let tradeDetailsForLogging =
-                   `user:       ${user.substring(0, 8)}
+                   `user:       ${user}
                     pair:       ${tradingPair}
                     direction:  ${direction}
                     price:      ${price}
